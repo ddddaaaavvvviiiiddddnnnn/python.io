@@ -1,54 +1,58 @@
-import random
+import nltk
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, classification_report
+from nltk.corpus import movie_reviews
+
+# Step 1: Setup - Install necessary libraries (if not installed)
+# !pip install nltk pandas scikit-learn
+
+# Step 2: Data Preparation
+nltk.download("movie_reviews")
+
+# Load the dataset
+documents = [
+    (" ".join(movie_reviews.words(fileid)), category)
+    for category in movie_reviews.categories()
+    for fileid in movie_reviews.fileids(category)
+]
+
+# Convert to DataFrame
+df = pd.DataFrame(documents, columns=["review", "sentiment"])
+
+# Step 3: Model Training
+
+# Convert text data to feature vectors
+vectorizer = CountVectorizer(max_features=2000)
+X = vectorizer.fit_transform(df["review"])
+y = df["sentiment"]
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Train a Naive Bayes classifier
+model = MultinomialNB()
+model.fit(X_train, y_train)
+
+# Evaluate the model
+y_pred = model.predict(X_test)
+print(f"Accuracy: {accuracy_score(y_test, y_pred)}")
+print(f"Classification Report:\n{classification_report(y_test, y_pred)}")
+
+# Step 4: Prediction
 
 
-def roll():
-    min_value = 1
-    max_value = 6
-    roll = random.randint(min_value, max_value)
-
-    return roll
+def predict_sentiment(text):
+    text_vector = vectorizer.transform([text])
+    prediction = model.predict(text_vector)
+    return prediction[0]
 
 
-while True:
-    players = input("Enter the number of players (2 - 4): ")
-    if players.isdigit():
-        players = int(players)
-        if 2 <= players <= 4:
-            break
-        else:
-            print("Must be between 2 - 4 players.")
-    else:
-        print("Invalid, try again.")
-
-max_score = 50
-player_scores = [0 for _ in range(players)]
-
-while max(player_scores) < max_score:
-    for player_idx in range(players):
-        print("\nPlayer number", player_idx + 1, "turn has just started!")
-        print("Your total score is:", player_scores[player_idx], "\n")
-        current_score = 0
-
-        while True:
-            should_roll = input("Would you like to roll (y)? ")
-            if should_roll.lower() != "y":
-                break
-
-            value = roll()
-            if value == 1:
-                print("You rolled a 1! Turn done!")
-                current_score = 0
-                break
-            else:
-                current_score += value
-                print("You rolled a:", value)
-
-            print("Your score is:", current_score)
-
-        player_scores[player_idx] += current_score
-        print("Your total score is:", player_scores[player_idx])
-
-max_score = max(player_scores)
-winning_idx = player_scores.index(max_score)
-print("Player number", winning_idx + 1,
-      "is the winner with a score of:", max_score)
+# Test the prediction function
+print(predict_sentiment("I absolutely loved this movie! It was fantastic."))
+print(predict_sentiment("It was a terrible film. I hated it."))
+print(predict_sentiment("The movie was okay, nothing special."))

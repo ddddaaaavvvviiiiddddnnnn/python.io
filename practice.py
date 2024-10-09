@@ -35,26 +35,3 @@ result = div_numbers(35,5)
 print (result)
 
 
-#recursive function
-def factorial(x):
-    """This is a recursive function
-    to find the factorial of an integer"""
-
-    if x == 1:
-        return 1
-    else:
-        return (x * factorial(x-1))
-
-
-num = 3
-print("The factorial of", num, "is", factorial(num))
-
-#anonymous function
-# Python code to illustrate the cube of a number
-# using lambda function
-def cube(x): return x*x*x
-
-cube_v2 = lambda x : x*x*x
-
-print(cube(7))
-print(cube_v2(7))
